@@ -1,0 +1,904 @@
+<!doctype html>
+<html lang="el">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+<title>ProΣτεγη CRM — Σύστημα Διαχείρισης Φωτοβολταϊκών</title>
+<meta name="description" content="Επαγγελματικό CRM για ενεργειακές εγκαταστάσεις. Πελάτες, προσφορές, αυτοψίες, εγκαταστάσεις, οικονομικά και ιστότοπος σε μια πλατφόρμα." />
+<meta name="application-name" content="ProΣτεγη CRM" />
+<meta name="authors" content="ProΣτεγη Ι.Κ.Ε." />
+<meta name="keywords" content="CRM, Φωτοβολταϊκά, Προσφορές, Αυτοψίες, Εγκαταστάσεις, Next.js, Prisma" />
+<meta name="theme-color" content="#0c1929" />
+<meta property="og:title" content="ProΣτεγη CRM" />
+<meta property="og:description" content="Σύστημα Διαχείρισης Φωτοβολταϊκών — Επαγγελματικό CRM για ενεργειακές εγκαταστάσεις." />
+<meta property="og:type" content="website" />
+<link rel="icon" type="image/svg+xml" href="logo.svg" />
+<style>
+:root {
+  --bg: #0c1929;
+  --bg-soft: #111f33;
+  --panel: #142339;
+  --panel-2: #1a2d48;
+  --border: #243a5a;
+  --text: #e6edf6;
+  --muted: #8aa0bd;
+  --accent: #f59e0b;
+  --accent-2: #fb923c;
+  --accent-3: #ef4444;
+  --teal: #2dd4bf;
+  --radius: 14px;
+  --shadow: 0 10px 30px rgba(0,0,0,.35);
+  --font-sans: "Plus Jakarta Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Noto Sans SC", sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.aurora {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(60% 50% at 80% -10%, rgba(245,158,11,.18), transparent 60%),
+    radial-gradient(50% 50% at 0% 30%, rgba(45,212,191,.10), transparent 60%),
+    radial-gradient(40% 40% at 50% 110%, rgba(251,146,60,.15), transparent 60%),
+    linear-gradient(180deg, #0c1929 0%, #0a1422 100%);
+}
+.aurora::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255,255,255,.04) 1px, transparent 1px);
+  background-size: 24px 24px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+}
+
+.container { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+.site-header {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(12, 25, 41, .72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.site-header .inner {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 24px; max-width: 1120px; margin: 0 auto;
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand .logo {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, #fbbf24, #f97316 60%, #ef4444);
+  border-radius: 10px;
+  display: grid; place-items: center;
+  box-shadow: 0 8px 24px rgba(245,158,11,.35);
+  animation: breathe 3s ease-in-out infinite;
+}
+.brand .logo svg { width: 22px; height: 22px; color: #fff; }
+.brand .name { font-weight: 800; font-size: 18px; letter-spacing: -.01em; }
+.brand .name .sigma { color: var(--accent); }
+.brand .tag { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.nav-links { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.nav-links a {
+  color: var(--muted); text-decoration: none; font-size: 14px;
+  padding: 8px 12px; border-radius: 8px;
+  transition: color .15s, background .15s;
+}
+.nav-links a:hover { color: var(--text); background: rgba(255,255,255,.04); }
+.btn-cta {
+  background: linear-gradient(135deg, #f59e0b, #f97316);
+  color: #1a0f00 !important; font-weight: 700 !important;
+  padding: 9px 16px !important;
+  box-shadow: 0 6px 18px rgba(245,158,11,.35);
+}
+.btn-cta:hover { filter: brightness(1.08); }
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: .95; }
+  50% { transform: scale(1.04); opacity: 1; }
+}
+
+.hero { padding: 96px 0 80px; text-align: center; position: relative; }
+.hero .sun-orb {
+  width: 84px; height: 84px;
+  background: linear-gradient(135deg, #fbbf24, #f97316 55%, #ef4444);
+  border-radius: 22px;
+  display: grid; place-items: center;
+  margin: 0 auto 28px;
+  box-shadow: 0 18px 50px rgba(245,158,11,.45);
+  animation: breathe 4s ease-in-out infinite;
+}
+.hero .sun-orb svg { width: 50px; height: 50px; color: #fff; }
+.hero h1 {
+  font-size: clamp(40px, 6vw, 64px);
+  font-weight: 800;
+  letter-spacing: -.02em;
+  margin: 0 0 12px;
+  line-height: 1.05;
+}
+.hero h1 .sigma { color: var(--accent); text-shadow: 0 0 24px rgba(245,158,11,.4); }
+.hero .subtitle {
+  font-size: clamp(16px, 2vw, 20px);
+  color: var(--muted);
+  max-width: 640px;
+  margin: 0 auto 28px;
+}
+.hero .chips {
+  display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+  margin-bottom: 36px;
+}
+.chip {
+  background: rgba(255,255,255,.05);
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--muted);
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.chip strong { color: var(--text); font-weight: 600; }
+.hero .cta-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 22px;
+  border-radius: 10px;
+  font-weight: 700; font-size: 15px;
+  text-decoration: none;
+  transition: transform .15s, box-shadow .15s, filter .15s;
+  cursor: pointer; border: none;
+}
+.btn-primary {
+  background: linear-gradient(135deg, #f59e0b, #f97316);
+  color: #1a0f00;
+  box-shadow: 0 12px 30px rgba(245,158,11,.35);
+}
+.btn-primary:hover { transform: translateY(-2px); filter: brightness(1.08); }
+.btn-secondary {
+  background: rgba(255,255,255,.05);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.btn-secondary:hover { background: rgba(255,255,255,.09); transform: translateY(-2px); }
+
+section.block { padding: 72px 0; }
+.section-head { text-align: center; margin-bottom: 48px; }
+.section-head .eyebrow {
+  font-size: 12px; font-weight: 700; letter-spacing: .12em;
+  color: var(--accent); text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.section-head h2 {
+  font-size: clamp(28px, 4vw, 38px);
+  font-weight: 800; letter-spacing: -.02em;
+  margin: 0 0 12px;
+}
+.section-head p {
+  color: var(--muted); max-width: 640px; margin: 0 auto;
+  font-size: 16px;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+}
+.feature-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  transition: transform .2s, border-color .2s, background .2s;
+  position: relative;
+  overflow: hidden;
+}
+.feature-card::before {
+  content: "";
+  position: absolute; left: 0; top: 0;
+  width: 3px; height: 100%;
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  opacity: 0; transition: opacity .2s;
+}
+.feature-card:hover { transform: translateY(-4px); border-color: rgba(245,158,11,.4); background: var(--panel-2); }
+.feature-card:hover::before { opacity: 1; }
+.feature-card .icon {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(245,158,11,.18), rgba(251,146,60,.10));
+  border: 1px solid rgba(245,158,11,.25);
+  display: grid; place-items: center;
+  margin-bottom: 14px;
+}
+.feature-card .icon svg { width: 22px; height: 22px; color: var(--accent); }
+.feature-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 700; }
+.feature-card p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.55; }
+.feature-card .group {
+  position: absolute; top: 16px; right: 16px;
+  font-size: 10px; font-weight: 700; letter-spacing: .08em;
+  color: var(--muted); text-transform: uppercase;
+  padding: 3px 8px; border-radius: 6px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--border);
+}
+
+.stack-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+.stack-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  display: flex; gap: 12px; align-items: center;
+  transition: border-color .2s, transform .2s;
+}
+.stack-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.stack-card .badge {
+  font-size: 11px; font-weight: 700;
+  padding: 3px 8px; border-radius: 6px;
+  background: rgba(45,212,191,.12); color: var(--teal);
+  border: 1px solid rgba(45,212,191,.3);
+}
+.stack-card .name { font-weight: 700; font-size: 14px; }
+.stack-card .ver { font-size: 12px; color: var(--muted); }
+
+.schema-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+.schema-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  border-left: 3px solid var(--accent);
+}
+.schema-card h4 {
+  margin: 0 0 8px; font-family: var(--font-mono);
+  color: var(--accent); font-size: 14px;
+}
+.schema-card ul { margin: 0; padding-left: 16px; color: var(--muted); font-size: 13px; }
+.schema-card li { margin-bottom: 3px; font-family: var(--font-mono); }
+.schema-card .group-tag {
+  display: inline-block; font-size: 10px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 8px;
+}
+
+.code-block {
+  background: #0a1422;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 14px 0;
+}
+.code-block .bar {
+  background: rgba(255,255,255,.03);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 16px;
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--muted);
+}
+.code-block .bar .dots { display: flex; gap: 6px; }
+.code-block .bar .dots span {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #ef4444; opacity: .7;
+}
+.code-block .bar .dots span:nth-child(2) { background: #f59e0b; }
+.code-block .bar .dots span:nth-child(3) { background: #22c55e; }
+.code-block pre {
+  margin: 0; padding: 16px 20px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: #cbd5e1;
+  overflow-x: auto;
+  line-height: 1.6;
+}
+.code-block .c-cm { color: #64748b; }
+.code-block .c-kw { color: #f472b6; }
+.code-block .c-str { color: #fbbf24; }
+.code-block .c-fn { color: #5eead4; }
+.code-block .c-var { color: #93c5fd; }
+
+.steps {
+  counter-reset: step;
+  display: flex; flex-direction: column; gap: 18px;
+}
+.step {
+  display: flex; gap: 18px; align-items: flex-start;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+}
+.step .num {
+  flex-shrink: 0;
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #1a0f00;
+  display: grid; place-items: center;
+  font-weight: 800; font-size: 16px;
+}
+.step h4 { margin: 0 0 6px; font-size: 16px; font-weight: 700; }
+.step p { margin: 0; color: var(--muted); font-size: 14px; }
+
+footer.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 40px 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+footer .inner {
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 12px; max-width: 1120px; margin: 0 auto; padding: 0 24px;
+}
+footer a { color: var(--accent); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+
+@media (max-width: 720px) {
+  .nav-links a:not(.btn-cta) { display: none; }
+  .hero { padding: 64px 0 48px; }
+  section.block { padding: 56px 0; }
+}
+</style>
+</head>
+<body>
+<div class="aurora"></div>
+
+<header class="site-header">
+  <div class="inner">
+    <div class="brand">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4" fill="currentColor"/>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+        </svg>
+      </div>
+      <div>
+        <div class="name">Pro<span class="sigma">Σ</span>τεγη</div>
+        <div class="tag">CRM Φωτοβολταϊκών</div>
+      </div>
+    </div>
+    <nav class="nav-links">
+      <a href="#features">Δυνατότητες</a>
+      <a href="#stack">Τεχνολογίες</a>
+      <a href="#schema">Δεδομένα</a>
+      <a href="#setup">Εγκατάσταση</a>
+      <a class="btn-cta" href="#setup">Ξεκίνησε</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero container">
+  <div class="sun-orb">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="4" fill="currentColor"/>
+      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+    </svg>
+  </div>
+  <h1>Pro<span class="sigma">Σ</span>τεγη CRM</h1>
+  <p class="subtitle">
+    Επαγγελματικό CRM για ενεργειακές εγκαταστάσεις. Πελάτες, προσφορές, αυτοψίες,
+    εγκαταστάσεις, οικονομικά και ιστότοπος — όλα σε μια ενιαία πλατφόρμα.
+  </p>
+  <div class="chips">
+    <span class="chip"><strong>Next.js 16</strong></span>
+    <span class="chip"><strong>React 19</strong></span>
+    <span class="chip"><strong>Prisma</strong> + SQLite</span>
+    <span class="chip"><strong>TailwindCSS</strong> + shadcn/ui</span>
+    <span class="chip"><strong>NextAuth</strong></span>
+  </div>
+  <div class="cta-row">
+    <a class="btn btn-primary" href="#setup">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Ξεκίνα γρήγορα
+    </a>
+    <a class="btn btn-secondary" href="#features">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"/></svg>
+      Δες τις δυνατότητες
+    </a>
+  </div>
+</section>
+
+<section class="block" id="features">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">Δυνατότητες</div>
+      <h2>Όλα όσα χρειάζεται μια ενεργειακή εταιρεία</h2>
+      <p>Δέκα ενότητες που καλύπτουν όλο το κύκλωμα ζωής του πελάτη — από το πρώτο ραντεβού μέχρι την εγκατάσταση και τη μετεγκαταστατική υποστήριξη.</p>
+    </div>
+
+    <div class="features-grid">
+      <article class="feature-card">
+        <span class="group">Κύριο</span>
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg></div>
+        <h3>Αρχική — Dashboard</h3>
+        <p>Στιγμιότυπα KPI: προσφορές σε εξέλιξη, επόμενες αυτοψίες, έσοδα, παραπονά σε εκκρεμότητα.</p>
+      </article>
+
+      <article class="feature-card">
+        <span class="group">Κύριο</span>
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <h3>Πελάτες</h3>
+        <p>Πλήρες προφίλ: στοιχεία επικοινωνίας, ΑΦΜ, κατηγορία, τοποθεσία, προσφορές, αυτοψίες, παραπονά, έγγραφα, σημειώσεις.</p>
+      </article>
+
+      <article class="feature-card">
+        <span class="group">Κύριο</span>
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
+        <h3>Προσφορές</h3>
+        <p>Wizard δημιουργίας προσφοράς με αυτόματο υπολογισμό KW, τιμών, εκπτώσεων, ΦΠΑ και δόσεων. Έξοδος σε PDF και Status pipeline.</p>
+      </article>
+
+      <article class="feature-card">
+        <span class="group">Κύριο</span>
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
+        <h3>Προϊόντα</h3>
+        <p>Κατάλογος: Inverters, Φωτοβολταϊκά, Μπαταρίες, Βάσεις, Αντικεραυνικά, Καλώδια. Πολλαπλοί προμηθευτές, stock, τιμές αγοράς/πώλησης.</p>
+      </article>
+
+      <article class="feature-card">
+        <span class="group">Λειτουργία</span>
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+        <h3>Αυτοψίες</h3>
+        <p>Φόρμα αυτοψίας με ερωτήσεις, φωτογραφίες, συντεταγμένες, εξοπλισμό, υπογραφή πελάτη και αυτόματη δημιουργία PDF.</p>
+      </article>
+
+      <article class="feature-card">
+        <span class="group">Λειτουργία</span>
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+        <h3>Ραντεβού</h3>
+        <p>Ημερολόγιο ραντεβού με τύπους (αυτοψία, εγκατάσταση, συντήρηση, meeting), υπενθυμίσεις και ανάθεση προσωπικού.</p>
+      </article>
+
+      <article class="feature-card">
+        <span class="group">Λειτουργία</span>
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+        <h3>Παραπονά</h3>
+        <p>Ticketing με αρίθμηση REQ-XXXXX, SLA (3 εργάσιμες), εσωτερικά σχόλια, ιστορικό επίλυσης.</p>
+      </article>
+
+      <article class="feature-card">
+        <span class="group">Λειτουργία</span>
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="12" y2="18"/></svg></div>
+        <h3>Ημερομηνίες Εγκατάστασης</h3>
+        <p>Αυτόματος υπολογισμός και προγραμματισμός ημερομηνιών εγκατάστασης βάσει διαθεσιμότητας και SLA.</p>
+      </article>
+
+      <article class="feature-card">
+        <span class="group">Σύστημα</span>
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+        <h3>Ιστότοπος & Portal</h3>
+        <p>CMS για σελίδες, BlogPost, LeadSubmission, e-shop προϊόντων και customer portal με public tokens (callme, unsub, agreement κ.ά.).</p>
+      </article>
+
+      <article class="feature-card">
+        <span class="group">Σύστημα</span>
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+        <h3>Ρυθμίσεις</h3>
+        <p>Key/value ρυθμίσεις, χρήστες & ρόλοι (admin / user / viewer), audit log, διαμόρφωση εταιρείας και προϊόντων.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="stack" style="background: rgba(255,255,255,.015);">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">Τεχνολογίες</div>
+      <h2>Σύγχρονο stack επόμενης γενιάς</h2>
+      <p>Χτισμένο σε Next.js 16 με App Router, React 19, Prisma ORM και οπτικό σύστημα βασισμένο σε shadcn/ui.</p>
+    </div>
+
+    <div class="stack-grid">
+      <div class="stack-card">
+        <div>
+          <div class="name">Next.js</div>
+          <div class="ver">v16 · App Router</div>
+        </div>
+        <div class="badge">Framework</div>
+      </div>
+      <div class="stack-card">
+        <div>
+          <div class="name">React</div>
+          <div class="ver">v19 · Server Components</div>
+        </div>
+        <div class="badge">UI</div>
+      </div>
+      <div class="stack-card">
+        <div>
+          <div class="name">TypeScript</div>
+          <div class="ver">v5 · strict</div>
+        </div>
+        <div class="badge">Lang</div>
+      </div>
+      <div class="stack-card">
+        <div>
+          <div class="name">Prisma</div>
+          <div class="ver">v6 · SQLite</div>
+        </div>
+        <div class="badge">ORM</div>
+      </div>
+      <div class="stack-card">
+        <div>
+          <div class="name">TailwindCSS</div>
+          <div class="ver">v4 · JIT</div>
+        </div>
+        <div class="badge">CSS</div>
+      </div>
+      <div class="stack-card">
+        <div>
+          <div class="name">shadcn/ui</div>
+          <div class="ver">Radix + CVA</div>
+        </div>
+        <div class="badge">Components</div>
+      </div>
+      <div class="stack-card">
+        <div>
+          <div class="name">NextAuth</div>
+          <div class="ver">v4 · Credentials</div>
+        </div>
+        <div class="badge">Auth</div>
+      </div>
+      <div class="stack-card">
+        <div>
+          <div class="name">TanStack Query</div>
+          <div class="ver">v5</div>
+        </div>
+        <div class="badge">Data</div>
+      </div>
+      <div class="stack-card">
+        <div>
+          <div class="name">Recharts</div>
+          <div class="ver">v2</div>
+        </div>
+        <div class="badge">Charts</div>
+      </div>
+      <div class="stack-card">
+        <div>
+          <div class="name">Framer Motion</div>
+          <div class="ver">v12</div>
+        </div>
+        <div class="badge">Animation</div>
+      </div>
+      <div class="stack-card">
+        <div>
+          <div class="name">React Hook Form</div>
+          <div class="ver">v7 + Zod</div>
+        </div>
+        <div class="badge">Forms</div>
+      </div>
+      <div class="stack-card">
+        <div>
+          <div class="name">Bun</div>
+          <div class="ver">Runtime + Install</div>
+        </div>
+        <div class="badge">Tooling</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="schema">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">Δεδομένα</div>
+      <h2>Κανονικοποιημένο σχεσιακό μοντέλο</h2>
+      <p>Αντικαθιστά 39 φύλλα Google Sheets με σχεσιακό σχήμα. Πλήρης audit trail, public tokens για portal και white-label λειτουργίες.</p>
+    </div>
+
+    <div class="schema-grid">
+      <div class="schema-card">
+        <span class="group-tag">Auth</span>
+        <h4>model User</h4>
+        <ul>
+          <li>username · password (bcrypt)</li>
+          <li>name · email · role</li>
+          <li>CustomerNote[] · AuditLog[]</li>
+        </ul>
+      </div>
+      <div class="schema-card">
+        <span class="group-tag">Auth</span>
+        <h4>model AuditLog</h4>
+        <ul>
+          <li>action · entity · entityId</li>
+          <li>details · createdAt</li>
+        </ul>
+      </div>
+      <div class="schema-card">
+        <span class="group-tag">CRM</span>
+        <h4>model Customer</h4>
+        <ul>
+          <li>firstName · lastName · mobile</li>
+          <li>afm · area · category</li>
+          <li>lat/lng · offers · inspections</li>
+        </ul>
+      </div>
+      <div class="schema-card">
+        <span class="group-tag">CRM</span>
+        <h4>model CustomerNote</h4>
+        <ul>
+          <li>customerId · text</li>
+          <li>createdBy · createdAt</li>
+        </ul>
+      </div>
+      <div class="schema-card">
+        <span class="group-tag">Catalog</span>
+        <h4>model Product</h4>
+        <ul>
+          <li>description · category · price</li>
+          <li>productCode · stock · kwUnit</li>
+          <li>Supplier[] · OfferItem[]</li>
+        </ul>
+      </div>
+      <div class="schema-card">
+        <span class="group-tag">Catalog</span>
+        <h4>model Supplier</h4>
+        <ul>
+          <li>name · phone · email · url</li>
+          <li>deliveryTime · country</li>
+          <li>ProductSupplier[]</li>
+        </ul>
+      </div>
+      <div class="schema-card">
+        <span class="group-tag">Offers</span>
+        <h4>model Offer</h4>
+        <ul>
+          <li>offerNumber PR-YYYY-NNNN</li>
+          <li>total · status · pdfUrl</li>
+          <li>installment %s (30/40/bal)</li>
+          <li>VAT · salesTax · invoice</li>
+        </ul>
+      </div>
+      <div class="schema-card">
+        <span class="group-tag">Offers</span>
+        <h4>model OfferItem</h4>
+        <ul>
+          <li>productId · description · qty</li>
+          <li>price · discount · lineTotal</li>
+        </ul>
+      </div>
+      <div class="schema-card">
+        <span class="group-tag">Ops</span>
+        <h4>model Inspection</h4>
+        <ul>
+          <li>AT-YYYY-NNNN · photos · GPS</li>
+          <li>signatureData · pvOption</li>
+          <li>InspectionEquipment[]</li>
+        </ul>
+      </div>
+      <div class="schema-card">
+        <span class="group-tag">Ops</span>
+        <h4>model Appointment</h4>
+        <ul>
+          <li>type · date · time · endDate</li>
+          <li>location · assignedStaff</li>
+          <li>calendarEventId</li>
+        </ul>
+      </div>
+      <div class="schema-card">
+        <span class="group-tag">Ops</span>
+        <h4>model Complaint</h4>
+        <ul>
+          <li>REQ-XXXXX · description</li>
+          <li>SLA dueDate (+3 εργ.)</li>
+          <li>ComplaintComment[]</li>
+        </ul>
+      </div>
+      <div class="schema-card">
+        <span class="group-tag">Ops</span>
+        <h4>model ContactRequest</h4>
+        <ul>
+          <li>type · requestNumber</li>
+          <li>status · notes</li>
+        </ul>
+      </div>
+      <div class="schema-card">
+        <span class="group-tag">Web</span>
+        <h4>model WebsitePage</h4>
+        <ul>
+          <li>slug · title · modules (JSON)</li>
+          <li>seoTitle · seoDescription</li>
+        </ul>
+      </div>
+      <div class="schema-card">
+        <span class="group-tag">Web</span>
+        <h4>model BlogPost</h4>
+        <ul>
+          <li>slug · title · excerpt</li>
+          <li>coverImageUrl · publishedAt</li>
+        </ul>
+      </div>
+      <div class="schema-card">
+        <span class="group-tag">Web</span>
+        <h4>model LeadSubmission</h4>
+        <ul>
+          <li>name · email · phone · message</li>
+          <li>source · customerId · status</li>
+        </ul>
+      </div>
+      <div class="schema-card">
+        <span class="group-tag">System</span>
+        <h4>model Setting / PublicToken</h4>
+        <ul>
+          <li>key/value ρυθμίσεις</li>
+          <li>public tokens (callme, unsub…)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="setup" style="background: rgba(255,255,255,.015);">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">Εγκατάσταση</div>
+      <h2>Ξεκίνα σε 4 βήματα</h2>
+      <p>Απαιτείται <strong>Bun</strong> (ή npm/yarn) και Node.js 20+. Η βάση είναι SQLite — δεν χρειάζεται εξωτερικός server.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="num">1</div>
+        <div style="flex:1;">
+          <h4>Κλώνοποιήσε το repository</h4>
+          <p>Με <code>git clone</code> κατέβασε τον κώδικα και μπες στον φάκελο του project.</p>
+          <div class="code-block">
+            <div class="bar"><div class="dots"><span></span><span></span><span></span></div><span>bash</span></div>
+<pre><span class="c-cm"># Clone &amp; enter</span>
+<span class="c-fn">git</span> clone https://github.com/&lt;your-org&gt;/prostegi-crm.git
+<span class="c-kw">cd</span> prostegi-crm</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num">2</div>
+        <div style="flex:1;">
+          <h4>Εγκατάστησε τις εξαρτήσεις</h4>
+          <p>Χρησιμοποιούμε <strong>Bun</strong> για ταχύτητα. Εναλλακτικά <code>npm install</code> ή <code>yarn</code>.</p>
+          <div class="code-block">
+            <div class="bar"><div class="dots"><span></span><span></span><span></span></div><span>bash</span></div>
+<pre><span class="c-fn">bun</span> install</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num">3</div>
+        <div style="flex:1;">
+          <h4>Ρύθμισε το .env &amp; τη βάση</h4>
+          <p>Δημιούργησε αρχείο <code>.env</code> με το <code>DATABASE_URL</code> και το <code>NEXTAUTH_SECRET</code>. Μετά τρέξε τις εντολές Prisma.</p>
+          <div class="code-block">
+            <div class="bar"><div class="dots"><span></span><span></span><span></span></div><span>.env</span></div>
+<pre><span class="c-var">DATABASE_URL</span>=<span class="c-str">"file:./dev.db"</span>
+<span class="c-var">NEXTAUTH_SECRET</span>=<span class="c-str">"change-me-please"</span>
+<span class="c-var">NEXTAUTH_URL</span>=<span class="c-str">"http://localhost:3000"</span></pre>
+          </div>
+          <div class="code-block">
+            <div class="bar"><div class="dots"><span></span><span></span><span></span></div><span>bash</span></div>
+<pre><span class="c-cm"># Generate client &amp; create the database</span>
+<span class="c-fn">bun</span> run db:generate
+<span class="c-fn">bun</span> run db:push</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num">4</div>
+        <div style="flex:1;">
+          <h4>Ξεκίνα τον dev server</h4>
+          <p>Άνοιξε <a href="http://localhost:3000" style="color:var(--accent);text-decoration:none;">http://localhost:3000</a> στον browser. To splash screen θα εμφανιστεί για ~1.2s και μετά το login.</p>
+          <div class="code-block">
+            <div class="bar"><div class="dots"><span></span><span></span><span></span></div><span>bash</span></div>
+<pre><span class="c-fn">bun</span> run dev
+
+<span class="c-cm"># Production build &amp; start</span>
+<span class="c-fn">bun</span> run build
+<span class="c-fn">bun</span> run start</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="structure">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">Δομή</div>
+      <h2>Δομή φακέλων</h2>
+      <p>Τυπική διάταξη Next.js App Router με API routes, CRM components και Prisma schema.</p>
+    </div>
+
+    <div class="code-block">
+      <div class="bar"><div class="dots"><span></span><span></span><span></span></div><span>project tree</span></div>
+<pre>prostegi-crm/
+├─ <span class="c-fn">prisma/</span>
+│  └─ schema.prisma          <span class="c-cm"># 18+ models</span>
+├─ <span class="c-fn">public/</span>
+│  ├─ logo.svg
+│  ├─ index.html             <span class="c-cm"># GitHub Pages landing</span>
+│  └─ robots.txt
+├─ <span class="c-fn">src/</span>
+│  ├─ app/
+│  │  ├─ layout.tsx
+│  │  ├─ page.tsx            <span class="c-cm"># Splash → Login → CrmShell</span>
+│  │  ├─ globals.css
+│  │  └─ api/
+│  │     └─ crm/
+│  │        ├─ customers/[route.ts + [id]/]
+│  │        ├─ offers/[route.ts + [id]/ + [id]/status/]
+│  │        ├─ products/[route.ts + [id]/]
+│  │        ├─ inspections/
+│  │        ├─ appointments/
+│  │        ├─ complaints/
+│  │        ├─ dashboard/
+│  │        └─ settings/
+│  ├─ components/
+│  │  ├─ crm/
+│  │  │  ├─ splash-screen.tsx
+│  │  │  ├─ login-form.tsx
+│  │  │  ├─ shell.tsx        <span class="c-cm"># Sidebar + Bottom nav</span>
+│  │  │  ├─ sections/        <span class="c-cm"># 10 sections</span>
+│  │  │  └─ widgets/         <span class="c-cm"># customer-modal, offer-wizard…</span>
+│  │  └─ ui/                 <span class="c-cm"># shadcn/ui (~50 components)</span>
+│  ├─ lib/
+│  │  ├─ auth.ts             <span class="c-cm"># NextAuth config</span>
+│  │  ├─ db.ts               <span class="c-cm"># Prisma client</span>
+│  │  └─ crm/{helpers,hooks}.ts
+│  └─ hooks/{use-toast,use-mobile}.ts
+├─ <span class="c-fn">tests/</span>
+├─ package.json
+├─ tailwind.config.ts
+├─ tsconfig.json
+└─ next.config.ts</pre>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="inner">
+    <div>
+      <strong>Pro<span style="color:var(--accent);">Σ</span>τεγη CRM</strong> · © <span id="year"></span> ProΣτεγη Ι.Κ.Ε.
+    </div>
+    <div style="display:flex; gap:14px;">
+      <a href="#features">Δυνατότητες</a>
+      <a href="#stack">Τεχνολογίες</a>
+      <a href="#setup">Εγκατάσταση</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const id = a.getAttribute('href');
+      if (id.length > 1) {
+        const el = document.querySelector(id);
+        if (el) {
+          e.preventDefault();
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    });
+  });
+</script>
+</body>
+</html>
